@@ -9,7 +9,7 @@ adduser is a wrapper around the command useradd. It uses a builder pattern to cr
 Switching users from root to sally did not require a password. The command prompt switched from the # symbol back to the $ symbol.
 Trying to create more users as sally fails, as only root has permission to create users.
 
-[![Shell output for useradd command](resources/experiment_1/userAdd1.png)]
+![Shell output for useradd command](resources/experiment_1/userAdd1.png)
 
 ## exit command
 
@@ -24,7 +24,7 @@ we can get the userid in two ways:
 The second command only works to show the userid associated with the current shell.
 The first command will also print the groups they are a part of if the -u flag is omitted.
 
-[![Using id -u to show groups](resources/experiment_1/uid1.png)]
+![Using id -u to show groups](resources/experiment_1/uid1.png)
 
 # Group Commands
 
@@ -64,8 +64,8 @@ Creating a fresh directory will result in the permissions of:
 
 I then created a script called helloWorld. I had to change permissions to enable execution using chmod.
 
-[![Shell output for adding execution perms to a file](resources/experiment_1/chmod.png)]
+![Shell output for adding execution perms to a file](resources/experiment_1/chmod1.png)
 
 I used ACL lists to add the cybersec group which contains <newuser> to the permissions list.
 
-[![Shell output while using ACL list to add a group to permissions list](resources/experiment_1/acl1.png)]
+![Shell output while using ACL list to add a group to permissions list](resources/experiment_1/acl1.png)
