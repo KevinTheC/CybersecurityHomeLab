@@ -69,12 +69,56 @@ The above screenshot proves this true, as execve env without passing environ pri
 setUID programs allow users to run programs that have escalated privilages. Linux programs inherit their parents UID, so system and execve are potential vectors of attack if we can cause them to open malicious programs.
 We used the following snippet to print the system environment variables after using `export` to set MYVAR, PATH, and LD_LIBRARY_PATH to 'custom'.
 
-![Snippet used to test if system('env') maintains environment variables](resources/experiment_2/task5_0.png)
+![Testing what variables setUID allows to be set](resources/experiment_2/task5_0.png)
 
 Looking through the environment variables, I found that MYVAR and PATH were modified, but LD_LIBRARY_PATH was not.
 LD_LIBRARY_PATH is protected to avoid linux from linking malicious code instead of system defaults. PATH is not protected, because kernel programs don't use PATH: its purely a user-space vulnerability.
-
-Modern shells have protections implemented for setUID programs, and don't permit PATH modification for setUID. We use zsh to test, as it doesn't have this protection.
+    
+Modern shells have protections implemented for setUID programs: PATH can still be modified, but a poisoned PATH variable will deescalate privilage?? verify this ??. and don't permit PATH modification for setUID. We use zsh to test, as it doesn't have this protection.
 
 ## Exploiting PATH with ZSH
 
+I created a vulnerable setUID program, which calls ls using system without passing in an absolute path. The OS will attempt to resolve this using the PATH environment variable.
+![SetUID program that calls ls without absolute path (looks in PATH)](resources/experiment_2/task6_0.png)
+We have a "malicious" ls executable that just prints the effective user id of this fake ls.
+!["Malicious" ls](resources/experiment_2/task6_1.png)
+
+When using dash or bash, the child process does not print the UID of the parent process' owner (1000).
+
+![Testing vulnerability using dash](resources/experiment_2/task6_2.png)
+
+When using zsh, the child process does print the UID of the parent process' owner (0).
+
+![Testing vulnerability using ZSH](resources/experiment_2/task6_3.png)
+
+## Exploiting LD_PRELOAD
+
+
+
+![Victim program myprog.c and malicious program mylib.c which contains a definition of sleep(int)](resources/experiment_2/task7_0.png)
+
+We compile mylib.c using this command: gcc -fPIC -g -c mylib.c
+- -fPIC causes position independent code which uses lookup tables instead of the base address of the program (which is different for every time its linked)
+- -c compiles but doesn't link the file
+
+Then we create the shared library .so file: gcc -shared -o libmylib.so.1.0.1 mylib.o -lc
+- -shared produces the .so file
+- -o <filename> gives the output file's name
+- <object file> instead of <source file>
+
+After that, we set the LD_PRELOAD path to our shared library.
+![Compiling mylib.c](resources/experiment_2/task7_1.png)
+
+We now try multiple different permission levels and setUID owners to experiment and see what happens.
+* regular file settings: malicious DLL loaded successfully
+* change to setUID program: DLL isn't loaded successfully
+
+![Testing myprog, setting permissions](resources/experiment_2/task7_2.png)
+
+I tried to set LD_PRELOAD from root in several ways. I didn't want to open a root shell. None worked.
+
+![Attempting to set LD_PRELOAD using sudo ./myprog and sudo env](resources/experiment_2/task7_3.png)
+
+I caved.
+
+![Using root shell to set LD_PRELOAD](resources/experiment_2/task7_4.png)
