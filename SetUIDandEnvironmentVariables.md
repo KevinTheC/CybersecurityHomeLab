@@ -74,7 +74,7 @@ We used the following snippet to print the system environment variables after us
 Looking through the environment variables, I found that MYVAR and PATH were modified, but LD_LIBRARY_PATH was not.
 LD_LIBRARY_PATH is protected to avoid linux from linking malicious code instead of system defaults. PATH is not protected, because kernel programs don't use PATH: its purely a user-space vulnerability.
     
-Modern shells have protections implemented for setUID programs: PATH can still be modified, but a poisoned PATH variable will deescalate privilage?? verify this ??. and don't permit PATH modification for setUID. We use zsh to test, as it doesn't have this protection.
+Modern shells have protections implemented for setUID programs: PATH can still be modified, but a poisoned PATH variable will deescalate privilage for children. and don't permit PATH modification for setUID. We use zsh to test, as it doesn't have this protection.
 
 ## Exploiting PATH with ZSH
 
@@ -93,7 +93,7 @@ When using zsh, the child process does print the UID of the parent process' owne
 
 ## Exploiting LD_PRELOAD
 
-
+The goal of this section is to attempt to use environment variables like LD_PRELOAD to inject malicious DLLs. We designed the two snippets below to demonstrate.
 
 ![Victim program myprog.c and malicious program mylib.c which contains a definition of sleep(int)](resources/experiment_2/task7_0.png)
 
@@ -120,5 +120,38 @@ I tried to set LD_PRELOAD from root in several ways. I didn't want to open a roo
 ![Attempting to set LD_PRELOAD using sudo ./myprog and sudo env](resources/experiment_2/task7_3.png)
 
 I caved.
+* root running root setUID program: DLL isn't loaded successfully
 
 ![Using root shell to set LD_PRELOAD](resources/experiment_2/task7_4.png)
+
+This behavior is the result of the OS protecting privilaged executions. If a user runs a setUID program, the OS will sanitize certain environment variables like LD_PRELOAD.
+Since this is OS behavior, changing to ZSH doesn't open up any potential vulnerabilities.
+
+## system() vs execve()
+
+This section of the lab explains why system is more dangerous to use than execve. The goal is to exploit a system vulnerability in the following setUID program:
+
+![Using root shell to set LD_PRELOAD](resources/experiment_2/task8_0.png)
+
+My initial instinct was to try exploiting using PATH. However, exploiting PATH isn't an option because '/bin/cat' is an absolute path. If the string inside system() was 'cat' we could use the PATH exploit using ZSH.
+
+![Changing PATH to ~/setup/task8 so that concatenation would result in ~/setup/task8/bin/cat](resources/experiment_2/task8_1.png)
+
+I did more research on how system actually works and learned what I had previously stated in this document:
+system actually calls ```c execve("/bin/sh", (char*[]){"sh", "-c", "/bin/cat", NULL}, environ); ``` - meaning the argument to /bin/cat is an argument to /bin/sh.
+This allows us to use an operator like || to run our own command if /bin/cat fails.
+
+![Exploit works in ZSH](resources/experiment_2/task8_2.png)
+
+In the above, the shell tries to execute /bin/cat on a gibberish file name, which fails and then executes ./bin/cat (malicious).
+
+When we switch to using execve and recompile, `|| ./bin/cat` is interpreted as part of the filename passed to /bin/cat. The exploit fails.
+
+![Switching to execve fixes the issue](resources/experiment_2/task8_3.png)
+
+## capability leaking
+
+If you open a file descriptor, then drop privilages in a setUID program, and create a child process, the child process will still have access to this file descriptor.
+
+![Opening file descriptor](resources/experiment_2/task9_0.png)
+![Capability leak!](resources/experiment_2/task9_1.png)
