@@ -10,11 +10,12 @@ The lab experiment I am going through today contains two sites, one malicious an
 
 - http://localhost:3000/transfer?to=alice&amount=25
 
-This vulnerability is so obvious I didn't really think it was a problem at large, but I guess it does make sense if you don't validate who is sending the request using sessions.
+~~This vulnerability is so obvious I didn't really think it was a problem at large, but I guess it does make sense if you don't validate who is sending the request using sessions.~~
+EDIT: I didn't read that the URL only contains the receiver, and not the sender. My initial reaction was based on that I thought it was possible to do a get request to force a transfer without even being logged in.
 
 I decided to log out of the "bob" account and begin using incognito tabs (which only saves session cookies for the current tab) as the website provided didn't have a logout option. This allows me to log in as alice or bob at once.
 
-I tried clicking the link again, and this time money did not transfer between accounts. The website does do validation of the session user, so this vulnerability was more concerning than my initial reaction.
+I tried clicking the link again as alice, and this time money did not transfer between accounts. The website does do validation of the session user, so this vulnerability was more concerning than my initial reaction.
 
 ## GET vs POST
 
