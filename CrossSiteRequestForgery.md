@@ -61,4 +61,4 @@ This changes the way authorization and payments work on the internet. If you wan
 
 CSRF tokens are slightly different. They are tokens that are embedded into the form when the site is sent. These tokens ensure the form originates on the site which will be receiving the POST request.
 
-My initial thought was, why can't a forger just make a request to the endpoint which distributes the form, but this action would be protected by Same Origin Policy. Websites can make requests to other sites, but they **cannot** read the response unless permitted by CORS.
+My initial thought was, "Why can't a forger just make a request to the endpoint which distributes the form?" but this action would be protected by Same Origin Policy. Websites can make requests to other sites, but they **cannot** read the response unless permitted by CORS.
