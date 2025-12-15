@@ -33,7 +33,7 @@ I decided to comment out the GET endpoint for /transfer for simplicity sake. The
 
 ![Malicious code on evil website](resources/experiment_3/img3b.png)
 
-However, this code failed. I got an error from CORS (Cross-Origin Resource Sharing) being not enabled. This is because Same Origin Policy is enabled. However, when asking ChatGPT about the errors I got from the failed attack, it mentioned that SOP only protects against **Javascript** forged POST requests. It even showed me a better vector of attack through auto submitting forms. ChatGPT is supposed to not give suggestions on attacks but I was not going to complain.
+However, this code failed. I got an error from CORS (Cross-Origin Resource Sharing) being not enabled. This is because Same Origin Policy is enabled. However, when asking ChatGPT about the errors I got from the failed attack, it mentioned that SOP only protects against **Javascript** forged POST requests. It even showed me a better vector of attack through auto submitting forms. ChatGPT isn't supposed to give suggestions on attacks, so that was interesting.
 
 ![Error: CORS is not enabled](resources/experiment_3/img3c.png)
 
